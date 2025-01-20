@@ -1,18 +1,25 @@
 pipeline {
     agent {
-        docker {
-            image 'maven:3.9.0'
-            args '-v /root/.m2:/root/.m2'
-        }
+        docker 'docker:19.03.12'  // Using Docker image that has Docker installed
     }
     stages {
+        stage('Setup Maven') {
+            steps {
+                script {
+                    // Install Maven in the Docker container
+                    sh 'apk add --no-cache maven'
+                }
+            }
+        }
         stage('Build') {
             steps {
+                // Build using Maven
                 sh 'mvn -B -DskipTests clean package'
             }
         }
         stage('Test') {
             steps {
+                // Run tests with Maven
                 sh 'mvn test'
             }
             post {
@@ -23,6 +30,7 @@ pipeline {
         }
         stage('Deliver') {
             steps {
+                // Custom deliver script or commands
                 sh './jenkins/scripts/deliver.sh'
             }
         }
